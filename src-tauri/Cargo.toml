@@ -1,10 +1,10 @@
 [package]
 name = "nuxtor"
 version = "1.1.1"
-description = "Starter template for Nuxt 3 and Tauri 2"
-authors = [ "NicolaSpadari" ]
+description = "Barix Label Printer App"
+authors = [ "Joao Batista" ]
 license = "MIT"
-repository = "https://github.com/NicolaSpadari/nuxtor"
+repository = "https://github.com/jotapebatista/label-printer-app"
 edition = "2021"
 
 [lib]

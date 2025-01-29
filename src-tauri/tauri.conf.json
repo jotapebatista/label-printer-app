@@ -31,14 +31,14 @@
 		"beforeDevCommand": "pnpm dev",
 		"devUrl": "http://localhost:3000"
 	},
-	"productName": "Nuxtor",
+	"productName": "Barix - Label Printer App",
 	"version": "1.1.1",
-	"identifier": "com.nicolaspadari.nuxtor",
+	"identifier": "com.jotapebatista.labelprinterapp",
 	"plugins": {},
 	"app": {
 		"windows": [
 			{
-				"title": "Nuxtor",
+				"title": "Barix - Label Printer App",
 				"width": 1366,
 				"height": 768,
 				"minWidth": 375,
