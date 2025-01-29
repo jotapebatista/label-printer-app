@@ -8,6 +8,10 @@
 	</Html>
 </template>
 
+<script setup lang="ts">
+
+</script>
+
 <style lang="scss">
 	html {
 		-webkit-tap-highlight-color: transparent;
