@@ -2,6 +2,7 @@
 	<Html class="min-h-screen scroll-smooth">
 		<Body class="overflow-x-hidden bg-dark-800 text-white font-text antialiased">
 			<NuxtLayout>
+				<Autoupdater />
 				<NuxtPage />
 			</NuxtLayout>
 		</Body>

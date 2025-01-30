@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   publish-tauri:
     permissions:
@@ -33,7 +34,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          # Targets for Mac builds only
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: install dependencies (ubuntu only)
@@ -41,7 +42,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-        # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -61,3 +61,34 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Generate latest.json
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 | sed 's/nuxtor-v//')
+          cat <<EOF > latest.json
+          {
+            "version": "$VERSION",
+            "notes": "Bug fixes and improvements.",
+            "pub_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "platforms": {
+              "windows-x86_64": {
+                "signature": "SIGNATURE_STRING",
+                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_x64-setup.exe"
+              },
+              "darwin-x86_64": {
+                "signature": "SIGNATURE_STRING",
+                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_x64.dmg"
+              },
+              "linux-x86_64": {
+                "signature": "SIGNATURE_STRING",
+                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_amd64.deb"
+              }
+            }
+          }
+          EOF
+
+      - name: Upload latest.json to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: latest.json
+          tag_name: nuxtor-v__VERSION__
