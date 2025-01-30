@@ -14,17 +14,13 @@ jobs:
       matrix:
         include:
           - platform: macos-latest
-            target: aarch64-apple-darwin
-            artifact: Barix.-.Label.Printer.App_${VERSION}_aarch64.dmg
+            args: --target aarch64-apple-darwin
           - platform: macos-latest
-            target: x86_64-apple-darwin
-            artifact: Barix.-.Label.Printer.App_${VERSION}_x64.dmg
+            args: --target x86_64-apple-darwin
           - platform: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-            artifact: Barix.-.Label.Printer.App_${VERSION}_amd64.deb
+            args: ""
           - platform: windows-latest
-            target: x86_64-pc-windows-msvc
-            artifact: Barix.-.Label.Printer.App_${VERSION}_x64-setup.exe
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -65,11 +61,24 @@ jobs:
 
       - name: Extract Tauri signature
         run: |
-          VERSION=$(git describe --tags --abbrev=0 | sed 's/nuxtor-v//')
-          SIGNATURE=$(cat src-tauri/target/release/bundle/${{ matrix.target }}/signature.txt)
-
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          SIGNATURE_PATH=$(find src-tauri/target -name "signature.txt" | head -n 1)
+          if [ -f "$SIGNATURE_PATH" ]; then
+            SIGNATURE=$(cat "$SIGNATURE_PATH")
+          else
+            echo "Error: Signature file not found!"
+            exit 1
+          fi
           echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+
+      - name: Get latest version
+        run: |
+          VERSION=$(git tag --list "nuxtor-v*" | sort -V | tail -n 1 | sed 's/nuxtor-v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Get artifact name
+        run: |
+          ARTIFACT_NAME=$(ls src-tauri/target/release/bundle/* | grep -E '(AppImage|deb|dmg|exe)$' | head -n 1)
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
 
       - name: Generate latest.json
         run: |
@@ -81,7 +90,7 @@ jobs:
             "platforms": {
               "${{ matrix.target }}": {
                 "signature": "$SIGNATURE",
-                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/${{ matrix.artifact }}"
+                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/$(basename $ARTIFACT_NAME)"
               }
             }
           }

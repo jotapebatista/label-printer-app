@@ -42,7 +42,7 @@
 			"endpoints": [
 				"https://github.com/jotapebatista/label-printer-app/releases/latest/download/latest.json"
 			],
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY4REY0Nzg5QzNFQjM0RgpSV1JQc3o2Y2VQU05ENmJ2TVZQcWsxQVpaZlJXQjZCZkJBNC9URWU3bmU1RnNia05zMUdRaVBtbQo=%  "
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY4REY0Nzg5QzNFQjM0RgpSV1JQc3o2Y2VQU05ENmJ2TVZQcWsxQVpaZlJXQjZCZkJBNC9URWU3bmU1RnNia05zMUdRaVBtbQo=%"
 		}
 	},
 	"app": {
