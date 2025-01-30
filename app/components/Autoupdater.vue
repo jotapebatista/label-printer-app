@@ -1,11 +1,4 @@
-<template>
-	<button :disabled="isChecking" class="btn btn-primary" @click="checkForAppUpdates(true)">
-		{{ isChecking ? 'Checking...' : 'Check for Updates' }}
-	</button>
-</template>
-
 <script setup>
-	// import { invoke } from "@tauri-apps/api";
 	import { invoke } from "@tauri-apps/api/core";
 	import { ask, message } from "@tauri-apps/plugin-dialog";
 	import { check } from "@tauri-apps/plugin-updater";

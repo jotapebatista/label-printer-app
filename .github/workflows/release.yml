@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   publish-tauri:
     permissions:
@@ -13,9 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest
+          - platform: macos-latest # Arm based macs
             args: --target aarch64-apple-darwin
-          - platform: macos-latest
+          - platform: macos-latest # Intel based macs
             args: --target x86_64-apple-darwin
           - platform: ubuntu-22.04
             args: ""
@@ -33,12 +32,16 @@ jobs:
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install dependencies (Ubuntu only)
+      - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -57,47 +60,4 @@ jobs:
           releaseBody: After installing the Apple app you have to run "xattr -c /Applications/Nuxtor.app" once before launching
           releaseDraft: false
           prerelease: false
-          args: --target ${{ matrix.target }}
-
-      - name: Extract Tauri signature
-        run: |
-          SIGNATURE_PATH=$(find src-tauri/target -name "signature.txt" | head -n 1)
-          if [ -f "$SIGNATURE_PATH" ]; then
-            SIGNATURE=$(cat "$SIGNATURE_PATH")
-          else
-            echo "Error: Signature file not found!"
-            exit 1
-          fi
-          echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
-
-      - name: Get latest version
-        run: |
-          VERSION=$(git tag --list "nuxtor-v*" | sort -V | tail -n 1 | sed 's/nuxtor-v//')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Get artifact name
-        run: |
-          ARTIFACT_NAME=$(ls src-tauri/target/release/bundle/* | grep -E '(AppImage|deb|dmg|exe)$' | head -n 1)
-          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
-
-      - name: Generate latest.json
-        run: |
-          cat <<EOF > latest.json
-          {
-            "version": "$VERSION",
-            "notes": "Bug fixes and improvements.",
-            "pub_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-            "platforms": {
-              "${{ matrix.target }}": {
-                "signature": "$SIGNATURE",
-                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/$(basename $ARTIFACT_NAME)"
-              }
-            }
-          }
-          EOF
-
-      - name: Upload latest.json to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: latest.json
-          tag_name: nuxtor-v__VERSION__
+          args: ${{ matrix.args }}
