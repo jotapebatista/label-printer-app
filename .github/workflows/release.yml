@@ -13,14 +13,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest # Arm based macs
-            args: --target aarch64-apple-darwin
-          - platform: macos-latest # Intel based macs
-            args: --target x86_64-apple-darwin
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            artifact: Barix.-.Label.Printer.App_${VERSION}_aarch64.dmg
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            artifact: Barix.-.Label.Printer.App_${VERSION}_x64.dmg
           - platform: ubuntu-22.04
-            args: ""
+            target: x86_64-unknown-linux-gnu
+            artifact: Barix.-.Label.Printer.App_${VERSION}_amd64.deb
           - platform: windows-latest
-            args: ""
+            target: x86_64-pc-windows-msvc
+            artifact: Barix.-.Label.Printer.App_${VERSION}_x64-setup.exe
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -33,11 +37,8 @@ jobs:
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          # Targets for Mac builds only
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install dependencies (ubuntu only)
+      - name: install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
@@ -60,28 +61,27 @@ jobs:
           releaseBody: After installing the Apple app you have to run "xattr -c /Applications/Nuxtor.app" once before launching
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
+          args: --target ${{ matrix.target }}
+
+      - name: Extract Tauri signature
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 | sed 's/nuxtor-v//')
+          SIGNATURE=$(cat src-tauri/target/release/bundle/${{ matrix.target }}/signature.txt)
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
 
       - name: Generate latest.json
         run: |
-          VERSION=$(git describe --tags --abbrev=0 | sed 's/nuxtor-v//')
           cat <<EOF > latest.json
           {
             "version": "$VERSION",
             "notes": "Bug fixes and improvements.",
             "pub_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
             "platforms": {
-              "windows-x86_64": {
-                "signature": "SIGNATURE_STRING",
-                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_x64-setup.exe"
-              },
-              "darwin-x86_64": {
-                "signature": "SIGNATURE_STRING",
-                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_x64.dmg"
-              },
-              "linux-x86_64": {
-                "signature": "SIGNATURE_STRING",
-                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/Barix.-.Label.Printer.App_${VERSION}_amd64.deb"
+              "${{ matrix.target }}": {
+                "signature": "$SIGNATURE",
+                "url": "https://github.com/jotapebatista/label-printer-app/releases/download/nuxtor-v$VERSION/${{ matrix.artifact }}"
               }
             }
           }

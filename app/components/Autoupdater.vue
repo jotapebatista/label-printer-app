@@ -16,7 +16,9 @@
 	async function checkForAppUpdates(onUserClick = false) {
 		isChecking.value = true;
 		try {
+			console.log("Checking for updates...");
 			const update = await check();
+
 			if (!update) {
 				await message("Failed to check for updates.\nPlease try again later.", {
 					title: "Error",
