@@ -133,7 +133,7 @@
 						id="qrInput"
 						v-model="qrInput"
 						class="w-full"
-						@input="onQrInput"
+						@input="debouncedPrint"
 					/>
 				</div>
 				<!-- Test Mode Enable -->
@@ -192,8 +192,6 @@
 </template>
 
 <script setup lang="ts">
-	import { test } from "@antfu/eslint-config";
-
 	const brand = ref("");
 	const ipAddr = ref("");
 	const labelFormat = ref("");
@@ -207,6 +205,8 @@
 	const lastPrintedInput = ref<string | null>(null);
 	const testMode = ref<boolean>(false);
 	const chatEl = ref<HTMLElement>();
+	let debounceTimer = null;
+
 	const qrPattern
 		= /^\d+,[0-9a-f:]+,[0-9a-z]+,[0-9a-z]+,[0-9a-z]+,\d{2}\/\d{2}\/\d{4},\w+,\w+,\d+,\d+,[0-9a-z ]+,[\w-]+,[0-9.]+,[0-9.]+,[0-9.]+,.*$/i;
 
@@ -216,6 +216,13 @@
 		labelFormat: false,
 		qrInput: false
 	});
+
+	const debouncedPrint = () => {
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			generatePayload();
+		}, 500);
+	};
 
 	const isFormValid = computed(() => {
 		return brand.value && ipAddr.value && labelFormat.value && qrInput.value;
@@ -275,7 +282,7 @@
 			output_file: macsFile.value,
 			copies: copies.value,
 			data_format: dataFormat.value,
-			test_mode: true
+			test_mode: false
 		});
 
 		try {
@@ -292,7 +299,7 @@
 				? `Success: ${JSON.stringify(result)}`
 				: `Error: ${JSON.stringify(result)}`;
 
-			if (response.ok) {
+			if (response.ok || labelFormat.value === "nomac") {
 				qrInput.value = "";
 			}
 

@@ -36,6 +36,8 @@
 	"identifier": "com.jotapebatista.labelprinterapp",
 	"plugins": {
 		"updater": {
+			"active": true,
+			"dialog": true,
 			"windows": {
 				"installMode": "passive"
 			},
