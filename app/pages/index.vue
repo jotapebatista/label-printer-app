@@ -4,69 +4,174 @@
 	>
 		<div class="mt-12 max-w-5xl w-full flex gap-6">
 			<!-- Printer Configuration (Left) -->
-			<UCard
-				class="p-6"
+			<div
+				class="rounded-lg bg-slate-800 p-6"
 				:class="[printedStickers.length ? 'w-1/2' : 'w-full']"
-				:ui="{ body: { padding: 'p-6' } }"
 			>
-				<h1 class="mb-6 text-center text-2xl font-bold">
+				<h1 class="mb-6 text-center text-2xl text-white font-bold">
 					Printer Configuration
 				</h1>
+				<!-- Printer Brand -->
+				<div class="mb-4">
+					<label
+						for="brand"
+						class="mb-2 block text-sm text-white font-medium"
+					>Printer Brand</label>
+					<select id="brand" v-model="brand" class="w-full">
+						<option value="">
+							Choose a printer type
+						</option>
+						<option value="brother">
+							Brother
+						</option>
+						<option value="tsc">
+							TSC
+						</option>
+						<option value="tsc-double">
+							TSC - Double Sticker
+						</option>
+					</select>
+				</div>
 
-				<UFormGroup label="Printer Brand" class="mb-4">
-					<USelect v-model="brand" :options="printerOptions" />
-				</UFormGroup>
+				<!-- Printer IP -->
+				<div class="mb-4">
+					<label
+						for="ipAddr"
+						class="mb-2 block text-sm text-white font-medium"
+					>Printer IP</label>
+					<input
+						id="ipAddr"
+						v-model.trim="ipAddr"
+						type="text"
+						class="w-full"
+					>
+				</div>
 
-				<UFormGroup label="Printer IP" class="mb-4">
-					<UInput v-model="ipAddr" placeholder="Enter printer IP" />
-				</UFormGroup>
+				<!-- Label Format -->
+				<div class="mb-4">
+					<label
+						for="labelFormat"
+						class="mb-2 block text-sm text-white font-medium"
+					>Label Format</label>
+					<select
+						id="labelFormat"
+						v-model="labelFormat"
+						class="w-full"
+					>
+						<option value="">
+							Choose the label format
+						</option>
+						<option value="ae">
+							AE
+						</option>
+						<option value="barix">
+							Barix
+						</option>
+						<option value="nomac">
+							NoMac
+						</option>
+						<option value="barix-legacy">
+							Legacy
+						</option>
+						<option value="edgeplayer">
+							EdgePlayer
+						</option>
+					</select>
+				</div>
 
-				<UFormGroup label="Label Format" class="mb-4">
-					<USelect v-model="labelFormat" :options="labelOptions" />
-				</UFormGroup>
+				<!-- Copies -->
+				<div class="mb-4">
+					<label
+						for="copiesNmr"
+						class="mb-2 block text-sm text-white font-medium"
+					>Copies</label>
+					<input
+						id="copiesNmr"
+						v-model="copies"
+						type="number"
+						class="w-full"
+					>
+				</div>
 
-				<UFormGroup label="Copies" class="mb-4">
-					<UInput v-model="copies" type="number" />
-				</UFormGroup>
+				<!-- Save Mac Address -->
+				<div class="mb-4">
+					<label
+						for="macsFile"
+						class="mb-2 block text-sm text-white font-medium"
+					>Save Mac Address</label>
+					<input
+						id="macsFile"
+						v-model="macsFile"
+						type="text"
+						class="w-full"
+					>
+				</div>
 
-				<UFormGroup label="Save Mac Address" class="mb-4">
-					<UInput v-model="macsFile" placeholder="Enter filename" />
-				</UFormGroup>
+				<!-- Data Format -->
+				<div class="mb-4">
+					<label
+						for="labelFormat"
+						class="mb-2 block text-sm text-white font-medium"
+					>Data Format</label>
+					<select id="dataFormat" v-model="dataFormat" class="w-full">
+						<option value="">
+							Choose QR Code data format
+						</option>
+						<option value="string">
+							String
+						</option>
+						<option value="json">
+							Json
+						</option>
+					</select>
+				</div>
 
-				<UFormGroup label="Data Format" class="mb-4">
-					<USelect
-						v-model="dataFormat"
-						:options="dataFormatOptions"
-					/>
-				</UFormGroup>
-
-				<UFormGroup label="QR Code Input" class="mb-4">
-					<UTextarea
+				<!-- QR Code Input -->
+				<div class="mb-4">
+					<label
+						for="qrInput"
+						class="block text-sm text-white font-medium"
+					>QR Code Input</label>
+					<textarea
+						id="qrInput"
 						v-model="qrInput"
-						placeholder="Scan QR code"
-						@input="debouncedPrint"
+						class="w-full"
+						@input="onQrInput"
 					/>
-				</UFormGroup>
-
-				<UFormGroup label="Test Mode" class="mb-4">
-					<UToggle v-model="testMode" />
-				</UFormGroup>
-
-				<UButton
-					block
-					color="primary"
-					variant="solid"
-					:disabled="!isFormValid"
-					@click="generatePayload"
-				>
-					Print Sticker
-				</UButton>
-			</UCard>
+				</div>
+				<!-- Test Mode Enable -->
+				<div class="mb-4 flex flex-col gap-1">
+					<span class="text-sm text-white font-medium">Test mode</span>
+					<div class="relative inline-block w-11 h-5">
+						<input
+							id="switch-component"
+							v-model="testMode"
+							type="checkbox"
+							class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-blue-600 cursor-pointer transition-colors duration-300"
+						>
+						<label
+							for="switch-component"
+							class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
+						/>
+					</div>
+				</div>
+				<!-- Save Button -->
+				<div>
+					<button
+						class="w-full rounded-lg bg-blue-500 px-4 py-2 text-white font-medium transition disabled:bg-gray-500 hover:bg-blue-600"
+						:disabled="!isFormValid"
+						@click="generatePayload"
+					>
+						Print Sticker
+					</button>
+				</div>
+			</div>
 
 			<!-- Printed Stickers (Right, Scrollable) -->
-			<UCard
+			<div
 				v-if="printedStickers.length"
-				class="h-full max-h-[calc(100vh-15rem)] w-1/2 overflow-y-auto"
+				ref="chatEl"
+				class="h-full max-h-[calc(100vh-15rem)] w-1/2 overflow-y-auto rounded-lg bg-light-100 p-4 dark:bg-dark-700"
 			>
 				<h2 class="mb-2 text-lg font-bold">
 					Printed Stickers
@@ -75,20 +180,23 @@
 					<li
 						v-for="(sticker, index) in printedStickers"
 						:key="index"
-						class="mb-1 border-b pb-2"
+						class="mb-1 border-b border-gray-300 pb-2"
 					>
-						<strong>MAC:</strong> {{ sticker.macaddress }}<br>
-						<strong>Serial:</strong> {{ sticker.serialnumber
-						}}<br>
+						<strong>MAC:</strong> {{ sticker.macaddress }}
+						<br>
+						<strong>Serial:</strong> {{ sticker.serialnumber }}
+						<br>
 						<strong>Reg ID:</strong> {{ sticker.regid }}
 					</li>
 				</ul>
-			</UCard>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+	import { test } from "@antfu/eslint-config";
+
 	const brand = ref("");
 	const ipAddr = ref("");
 	const labelFormat = ref("");
@@ -102,29 +210,6 @@
 	const lastPrintedInput = ref<string | null>(null);
 	const testMode = ref<boolean>(false);
 	const chatEl = ref<HTMLElement>();
-	let debounceTimer = null;
-
-	const printerOptions = [
-		{ label: "Choose a printer type", value: "" },
-		{ label: "Brother", value: "brother" },
-		{ label: "TSC", value: "tsc" },
-		{ label: "TSC - Double Sticker", value: "tsc-double" }
-	];
-	const labelOptions = [
-		{ label: "Choose the label format", value: "" },
-		{ label: "AE", value: "ae" },
-		{ label: "Barix", value: "barix" },
-		{ label: "NoMac", value: "nomac" },
-		{ label: "EdgePlayer", value: "edgeplayer" },
-		{ label: "Legacy", value: "barix-legacy" }
-	];
-
-	const dataFormatOptions = [
-		{ label: "Choose QR Code data format", value: "" },
-		{ label: "String", value: "string" },
-		{ label: "Json", value: "json" }
-	];
-
 	const qrPattern
 		= /^\d+,[0-9a-f:]+,[0-9a-z]+,[0-9a-z]+,[0-9a-z]+,\d{2}\/\d{2}\/\d{4},\w+,\w+,\d+,\d+,[0-9a-z ]+,[\w-]+,[0-9.]+,[0-9.]+,[0-9.]+,.*$/i;
 
@@ -134,13 +219,6 @@
 		labelFormat: false,
 		qrInput: false
 	});
-
-	const debouncedPrint = () => {
-		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => {
-			generatePayload();
-		}, 500);
-	};
 
 	const isFormValid = computed(() => {
 		return brand.value && ipAddr.value && labelFormat.value && qrInput.value;
@@ -155,7 +233,7 @@
 						behavior: "smooth"
 					});
 				}
-			}, 500);
+			}, 300);
 		}
 	});
 
@@ -200,7 +278,7 @@
 			output_file: macsFile.value,
 			copies: copies.value,
 			data_format: dataFormat.value,
-			test_mode: false
+			test_mode: true
 		});
 
 		try {
@@ -217,7 +295,7 @@
 				? `Success: ${JSON.stringify(result)}`
 				: `Error: ${JSON.stringify(result)}`;
 
-			if (response.ok || labelFormat.value === "nomac") {
+			if (response.ok) {
 				qrInput.value = "";
 			}
 
