@@ -1,9 +1,9 @@
 <template>
 	<Html class="min-h-screen scroll-smooth">
-		<Body class="overflow-x-hidden bg-dark-800 text-white font-text antialiased">
+		<Body class="overflow-x-hidden bg-slate-800 font-mono">
 			<NuxtLayout>
-				<!-- <Autoupdater /> -->
 				<NuxtPage />
+				<Toaster />
 			</NuxtLayout>
 		</Body>
 	</Html>

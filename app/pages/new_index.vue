@@ -1,15 +1,5 @@
 <template>
 	<div class="flex h-screen">
-		<div v-if="isLoading" class="absolute h-screen w-screen z-5 bg-slate-900 bg-opacity-50 flex items-center justify-center">
-			<div role="status" class="m-auto">
-				<svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-					<path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-				</svg>
-				<span class="sr-only">Loading...</span>
-			</div>
-		</div>
-
 		<div class="transition-all duration-300 ease-in-out m-auto">
 			<!-- Printer Configuration -->
 			<div class="bg-slate-600 rounded-md p-4 min-w-xl">
@@ -26,7 +16,6 @@
 					</div>
 
 					<!-- Show switch only if the selected printer is a TSC -->
-
 					<div
 						v-if="selectedPrinterBrand === 'tsc'"
 						class="flex gap-2 h-full self-end"
@@ -52,7 +41,6 @@
 						</Switch>
 					</div>
 				</div>
-
 				<div class="grid grid-cols-2 gap-4">
 					<FormSelect
 						v-model="selectedFormat"
@@ -66,7 +54,6 @@
 						:min="1"
 					/>
 				</div>
-
 				<div class="grid grid-cols-1 gap-4">
 					<FormInput
 						v-model="macAddressFile"
@@ -80,7 +67,6 @@
 						@input="debouncedPrint"
 					/>
 				</div>
-
 				<!-- Print Sticker Button -->
 				<div class="flex items-center gap-2">
 					<button
@@ -91,15 +77,6 @@
 					>
 						Print Sticker
 					</button>
-					<button
-						v-if="true"
-						class="w-full bg-blue-600 text-white py-3 rounded-sm font-semibold hover:bg-blue-700 transition duration-200 mt-2"
-						:disabled="isPrinting"
-						:class="{ 'opacity-50 cursor-not-allowed': isPrinting }"
-						@click="reprintSticker(lastInput)"
-					>
-						Print Previous
-					</button>
 				</div>
 			</div>
 		</div>
@@ -109,7 +86,6 @@
 <script setup lang="ts">
 	const { addToast } = useToast();
 
-	const BASE_URL = "http://label-server.bstuff:9000";
 	const selectedFormat = ref(null);
 	const selectedPrinter = ref(null);
 	const copies = ref(1);
@@ -117,27 +93,22 @@
 	const qrCodeInput = ref("");
 	const lastInput = ref("");
 	const isPrinting = ref(false);
-	const isLoading = ref(false);
+	const isDoubleSticker = ref(false);
+	let debounceTimer: any = null;
+	const BASE_URL = "http://label-server.bstuff:9000";
 
-	const labelOptions = ref([]);
+	const labelOptions = ref([{ label: "Choose the label format", value: null }]);
 
-	interface Printer {
-		label: string
-		value: string
-		brand: string
-	}
-
-	const availablePrinters = ref<Printer[]>([]);
-
-	const printedStickers = ref<Set<string>>(new Set());
-	// const stickersExist = computed(() => printedStickers.value.size > 0);
-	// const stickers = computed(() => Array.from(printedStickers.value));
+	const availablePrinters = ref([
+		{ label: "Choose an available printer", value: null, brand: null }
+	]);
 	const selectedPrinterBrand = computed(() => {
 		return (
 			availablePrinters.value.find((p) => p.value === selectedPrinter.value)
 				?.brand || null
 		);
 	});
+
 	// Show toasts
 	const showToast = (
 		msg: string,
@@ -150,7 +121,6 @@
 
 	const fetchData = async () => {
 		try {
-			isLoading.value = true;
 			const response = await fetch(
 				`${BASE_URL}/file?file_name=printers.json`
 			);
@@ -169,20 +139,14 @@
 				label: label.label,
 				value: label.value
 			}));
-			isLoading.value = false;
 		} catch (error) {
-			showToast(`Error fetching data: ${error}`, "error", 3000, true);
-			isLoading.value = false;
+			showToast("Error fetching data", "error", 3000, true);
 		}
 	};
 
 	onMounted(() => {
 		fetchData();
 	});
-
-	const isDoubleSticker = ref<boolean>(false);
-
-	let debounceTimer: any = null;
 
 	const detectInputType = () => {
 		try {
@@ -193,7 +157,6 @@
 		}
 	};
 
-	// Generate Payload to Print Sticker
 	const generatePayload = async () => {
 		isPrinting.value = true;
 		const brand = availablePrinters.value.find(
@@ -225,15 +188,6 @@
 			});
 
 			if (response.ok) {
-				let stickersArray = Array.from(printedStickers.value);
-				stickersArray = stickersArray.filter(
-					(item) => item !== qrCodeInput.value
-				);
-
-				stickersArray.unshift(qrCodeInput.value);
-
-				printedStickers.value = new Set(stickersArray.slice(0, 50));
-
 				qrCodeInput.value = "";
 				lastInput.value = qrCodeInput.value;
 				showToast("Sticker printed successfully", "success", 3000, true);
@@ -249,33 +203,15 @@
 			}
 			isPrinting.value = false;
 		} catch (error) {
-			// notify("Error printing sticker", "error");
 			showToast(`Error printing sticker: ${error}`, "error", 3000, true);
 			console.error("Error printing sticker:", error);
 		}
 	};
 
-	// Debounced QR Code Input Handling
 	const debouncedPrint = () => {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			generatePayload();
 		}, 500);
 	};
-
-	const reprintSticker = (qrCode: string) => {
-	// generatePayload();
-	};
 </script>
-
-<style scoped>
-.stickers-transition-enter-active,
-.stickers-transition-leave-active {
-	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
-.stickers-transition-enter,
-.stickers-transition-leave-to {
-	transform: translateX(100%);
-	opacity: 0;
-}
-</style>

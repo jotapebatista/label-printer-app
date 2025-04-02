@@ -3,7 +3,7 @@
 		<!-- <SiteNavbar class="sticky" /> -->
 		<!-- <SiteSidebar /> -->
 
-		<div crate>
+		<div>
 			<slot />
 		</div>
 	</div>
