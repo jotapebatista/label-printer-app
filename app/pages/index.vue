@@ -109,8 +109,8 @@
 <script setup lang="ts">
 	const { addToast } = useToast();
 
-	// const BASE_URL = "http://label-server.bstuff:9000";
-	const BASE_URL = "http://192.168.40.60:9000"; // TODO: Change this to the actual server IP
+	const BASE_URL = "http://label-server.bstuff:9000";
+	// const BASE_URL = "http://192.168.40.60:9000"; // TODO: Change this to the actual server IP
 
 	const selectedFormat = ref(null);
 	const selectedPrinter = ref(null);
@@ -267,7 +267,7 @@
 	};
 
 	const reprintSticker = (qrCode: string) => {
-	generatePayload(true);
+		generatePayload(true);
 	};
 </script>
 
