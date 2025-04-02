@@ -1,47 +1,10 @@
-<p align="center">
-    <img width="150" src="./public/logo.png" alt="logo">
-</p>
-<h1 align="center">NUXTOR</h1>
-<p align="center">
-A spiritual successor of <a href="https://github.com/NicolaSpadari/vitauri">ViTauri</a>, made with <a href="https://nuxt.com">Nuxt 3</a> and <a href="https://v2.tauri.app">Tauri 2</a>
-<br>
-Build super fast desktop applications!
-</p>
-
-<br />
-
-<p float="left">
-	<img src="https://img.shields.io/github/package-json/v/NicolaSpadari/nuxtor" />
-	<img src="https://img.shields.io/github/license/NicolaSpadari/nuxtor" />
-</p>
-
-<br />
-
-<div align="center">
-<img src="./public/screenshot.png">
-</div>
-
-<p align="center">Powered by Nuxt 3</p>
-
-<br />
-
 ## Technologies run-down
 
-- Nuxt 3 (v4 ready!)
+- Nuxt 3
 - Tauri 2
 - UnoCSS
 - Typescript
 - ESLint
-- Auto imports (for Tauri api too!)
-
-## Functionalities
-
-- Run shell commands from the app
-- Send custom notifications to the client (remember to turn on/grant notifications in your computer settings)
-- Display OS related informations
-- Store and retrieve data locally
-- Show tray icon
-- Support all Nuxt functionalities (routing/layout/middleware/modules/etc...)
 
 ## Setup
 
@@ -51,11 +14,8 @@ Build super fast desktop applications!
   - Once ready, follow these commands:
 
   ```sh
-  # use this template
-  $ npx degit NicolaSpadari/nuxtor my-nuxtor-app
-
   # go into the folder
-  $ cd my-nuxtor-app
+  $ cd label-printer-app
 
   # install dependencies
   $ pnpm install
@@ -90,5 +50,4 @@ The same Tauri bundle will generate under `src-tauri/target`, but with the abili
 
 ## License
 
-MIT License © 2024-PRESENT [NicolaSpadari](https://github.com/NicolaSpadari)
-# label-printer-app
+MIT License © 2024 - Present [João Batista](https://github.com/jotapebatista)

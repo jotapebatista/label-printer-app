@@ -55,9 +55,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: nuxtor-v__VERSION__
-          releaseName: Nuxtor v__VERSION__
-          releaseBody: After installing the Apple app you have to run "xattr -c /Applications/Nuxtor.app" once before launching
+          tagName: label-printing-app-v__VERSION__ # Changed to 'label-printing-app'
+          releaseName: Label Printing App v__VERSION__ # Changed to 'Label Printing App'
+          releaseBody: After installing the Brightstuff label printing app, you have to run "xattr -c /Applications/Label-Printing-App.app" once before launching. # Updated for the new name
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

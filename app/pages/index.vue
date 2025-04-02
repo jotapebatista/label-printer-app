@@ -87,14 +87,14 @@
 						class="w-full bg-blue-600 text-white py-3 rounded-sm font-semibold hover:bg-blue-700 transition duration-200 mt-2"
 						:disabled="isPrinting"
 						:class="{ 'opacity-50 cursor-not-allowed': isPrinting }"
-						@click="generatePayload"
+						@click="generatePayload(false)"
 					>
 						Print Sticker
 					</button>
 					<button
-						v-if="true"
+						v-if="lastInput !== ''"
 						class="w-full bg-blue-600 text-white py-3 rounded-sm font-semibold hover:bg-blue-700 transition duration-200 mt-2"
-						:disabled="isPrinting"
+						:disabled="isPrinting && lastInput === ''"
 						:class="{ 'opacity-50 cursor-not-allowed': isPrinting }"
 						@click="reprintSticker(lastInput)"
 					>
@@ -109,7 +109,9 @@
 <script setup lang="ts">
 	const { addToast } = useToast();
 
-	const BASE_URL = "http://label-server.bstuff:9000";
+	// const BASE_URL = "http://label-server.bstuff:9000";
+	const BASE_URL = "http://192.168.40.60:9000"; // TODO: Change this to the actual server IP
+
 	const selectedFormat = ref(null);
 	const selectedPrinter = ref(null);
 	const copies = ref(1);
@@ -194,8 +196,9 @@
 	};
 
 	// Generate Payload to Print Sticker
-	const generatePayload = async () => {
+	const generatePayload = async (printLast = false) => {
 		isPrinting.value = true;
+
 		const brand = availablePrinters.value.find(
 			(printer) => printer.value === selectedPrinter.value
 		)?.brand;
@@ -210,7 +213,7 @@
 			address: selectedPrinter.value,
 			protocol: "tcp",
 			label_format: selectedFormat.value,
-			input_data: qrCodeInput.value,
+			input_data: printLast ? lastInput.value : qrCodeInput.value,
 			output_file: macAddressFile.value,
 			copies: copies.value,
 			data_format: detectInputType(),
@@ -259,12 +262,12 @@
 	const debouncedPrint = () => {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
-			generatePayload();
+			generatePayload(false);
 		}, 500);
 	};
 
 	const reprintSticker = (qrCode: string) => {
-	// generatePayload();
+	generatePayload(true);
 	};
 </script>
 
