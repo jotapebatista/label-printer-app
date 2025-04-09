@@ -312,8 +312,6 @@
 
 		const jsonPayload = JSON.stringify(payload);
 
-		console.log(jsonPayload);
-		return;
 		try {
 			const response = await fetch(`${BASE_URL}/print_labels`, {
 				method: "POST",
