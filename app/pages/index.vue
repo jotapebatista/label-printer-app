@@ -66,26 +66,39 @@
 					</div>
 				</div>
 
-				<div class="grid grid-cols-2 gap-4">
-					<FormSelect
+				<div class="flex w-full">
+					<!-- <FormSelect
 						v-model="selectedFormat"
 						label="Label Format"
 						:options="labelOptions"
+					/> -->
+					<FormMultiLabelSelect
+						v-model="selectedLabels"
+						label="Select Labels and Quantities"
+						:options="labelOptions"
+						@dataplate-selected="handleDataplate"
 					/>
-					<FormInput
+					<!-- <FormInput
 						v-model="copies"
 						label="Copies"
 						type="number"
 						:min="1"
+					/> -->
+				</div>
+
+				<div v-if="isDataplateSelected">
+					<FileUpload
+						v-if="isDataplateSelected"
+						@pdf-selected="handlePdfUpload"
 					/>
 				</div>
 
 				<div class="grid grid-cols-1 gap-4">
-					<FormInput
+					<!-- <FormInput
 						v-model="macAddressFile"
 						label="Save Mac Address"
 						placeholder="Enter file name"
-					/>
+					/> -->
 					<FormTextarea
 						v-model="qrCodeInput"
 						label="QR Code Input"
@@ -122,17 +135,30 @@
 <script setup lang="ts">
 	const { addToast } = useToast();
 
-	const BASE_URL = "http://label-server.bstuff:9000";
-	// const BASE_URL = "http://192.168.40.60:9000"; // TODO: Change this to the actual server IP
+	// const BASE_URL = "http://label-server.bstuff:9000";
+	const BASE_URL = "http://label-server.bstuff:6500"; //  Change this to the actual server IP
 
-	const selectedFormat = ref(null);
+	// ux8 command: python3 main.py -f UX8.pdf -l dataplate nomac nomac nomac -d string -a 192.168.40.226 -p tcp -b tsc-double -n
+
+	const selectedLabels = ref<string[]>([]);
 	const selectedPrinter = ref(null);
-	const copies = ref(1);
-	const macAddressFile = ref("");
+	const isDataplateSelected = ref(false);
 	const qrCodeInput = ref("");
 	const lastInput = ref("");
 	const isPrinting = ref(false);
 	const isLoading = ref(false);
+	const uploadStatus = ref<string | null>(null);
+	const selectedFile = ref<string | null>(null);
+
+	const uploadStatusClass = computed(() => {
+		if (!uploadStatus.value)
+			return "";
+		if (uploadStatus.value.includes("successfully"))
+			return "text-green-600";
+		if (uploadStatus.value.includes("already exists"))
+			return "text-yellow-600";
+		return "text-red-600";
+	});
 
 	const labelOptions = ref([]);
 
@@ -142,6 +168,54 @@
 		brand: string
 	}
 
+	const handleDataplate = (newVal: boolean) => {
+		isDataplateSelected.value = newVal;
+	};
+	const handlePdfUpload = async (file: File) => {
+		const formData = new FormData();
+		formData.append("pdf_file", file);
+
+		try {
+			const response = await fetch(`${BASE_URL}/upload_pdf`, {
+				method: "POST",
+				body: formData
+			});
+
+			const result = await response.json();
+
+			if (response.status === 302) {
+				uploadStatus.value = result.message || "File already exists.";
+				selectedFile.value = result.file_path;
+				showToast(
+					"File alaready exists. You can proceed to print.",
+					"success",
+					3000,
+					true
+				);
+			} else if (response.ok) {
+				uploadStatus.value = result.message;
+				selectedFile.value = result.file_path;
+				showToast(
+					"File uploaded successfully.",
+					"success",
+					3000,
+					true
+				);
+			} else {
+				uploadStatus.value = result.error || "Upload failed.";
+				selectedFile.value = null;
+				showToast(
+					"File upload failed.",
+					"error",
+					3000,
+					true
+				);
+			}
+		} catch (error) {
+			console.error(error);
+			uploadStatus.value = "An error occurred during upload.";
+		}
+	};
 	const availablePrinters = ref<Printer[]>([]);
 
 	const printedStickers = ref<Set<string>>(new Set());
@@ -221,20 +295,27 @@
 				? `${brand}-double`
 				: brand || "";
 
-		const jsonPayload = JSON.stringify({
+		const payload: Record<string, any> = {
 			brand: pBrand,
 			address: selectedPrinter.value,
 			protocol: "tcp",
-			label_format: selectedFormat.value,
+			label_format: selectedLabels.value,
 			input_data: printLast ? lastInput.value : qrCodeInput.value,
-			output_file: macAddressFile.value,
-			copies: copies.value,
 			data_format: detectInputType(),
-			test_mode: false
-		});
+			test_mode: false,
+			no_check_duplicate: true
+		};
 
+		if (selectedFile.value) {
+			payload.image_file = selectedFile.value;
+		}
+
+		const jsonPayload = JSON.stringify(payload);
+
+		console.log(jsonPayload);
+		return;
 		try {
-			const response = await fetch(`${BASE_URL}/print`, {
+			const response = await fetch(`${BASE_URL}/print_labels`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: jsonPayload
