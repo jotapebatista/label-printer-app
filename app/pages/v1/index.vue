@@ -1,8 +1,19 @@
 <template>
 	<div class="flex h-screen">
-		<div class="transition-all duration-300 ease-in-out m-auto">
+		<div class="absolute top-4 left-0 right-0 flex justify-center h-18">
+			<div class="flex justify-center mb-6">
+				<NuxtLink
+					to="/"
+					class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-semibold text-white transition duration-300 ease-out bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-xl hover:from-indigo-600 hover:to-purple-600 hover:scale-105"
+				>
+					<span class="absolute inset-0 bg-gradient-to-br from-indigo-700 to-purple-700 opacity-25 blur-sm" />
+					<span class="relative z-10">🚀 Use V2</span>
+				</NuxtLink>
+			</div>
+		</div>
+		<div class="transition-all duration-300 ease-in-out m-auto w-full max-w-screen-md p-4">
 			<!-- Printer Configuration -->
-			<div class="bg-slate-600 rounded-md p-4 min-w-xl">
+			<div class="bg-slate-700/80 backdrop-blur-md rounded-xl p-6 shadow-lg">
 				<div class="w-full flex justify-center items-center flex-col">
 					<Logo />
 				</div>
@@ -71,7 +82,7 @@
 				<div class="flex items-center gap-2">
 					<button
 						class="w-full bg-blue-600 text-white py-3 rounded-sm font-semibold hover:bg-blue-700 transition duration-200 mt-2"
-						:disabled="isPrinting"
+						:loading="isPrinting"
 						:class="{ 'opacity-50 cursor-not-allowed': isPrinting }"
 						@click="generatePayload"
 					>

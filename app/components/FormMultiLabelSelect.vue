@@ -15,6 +15,9 @@
 							class="text-gray-800 h-8 overflow-x-auto whitespace-nowrap"
 						>
 							<!-- Wrap the items in a horizontal flex row -->
+							<div v-if="!selectedItems.length" class="flex space-x-2">
+								Select labels...
+							</div>
 							<div class="flex space-x-2">
 								<div
 									v-for="(item, index) in selectedItems"

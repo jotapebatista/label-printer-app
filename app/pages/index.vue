@@ -1,5 +1,17 @@
 <template>
 	<div class="flex h-screen">
+		<div class="absolute top-4 left-0 right-0 flex justify-center h-18">
+			<div class="flex justify-center mb-6">
+				<NuxtLink
+					to="/v1"
+					class="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-semibold text-white transition duration-300 ease-out bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-xl hover:from-indigo-600 hover:to-purple-600 hover:scale-105"
+				>
+					<span class="absolute inset-0 bg-gradient-to-br from-indigo-700 to-purple-700 opacity-25 blur-sm" />
+					<span class="relative z-10">🚀 Use V1</span>
+				</NuxtLink>
+			</div>
+		</div>
+
 		<div
 			v-if="isLoading"
 			class="absolute h-screen w-screen z-5 bg-slate-900 bg-opacity-50 flex items-center justify-center"
@@ -89,7 +101,8 @@
 				<div v-if="isDataplateSelected">
 					<FileUpload
 						v-if="isDataplateSelected"
-						@pdf-selected="handlePdfUpload"
+						@pdf-inserted="handlePdfUpload"
+						@pdf-selected="selectedFile = $event"
 					/>
 				</div>
 
@@ -136,7 +149,7 @@
 	const { addToast } = useToast();
 
 	// const BASE_URL = "http://label-server.bstuff:9000";
-	const BASE_URL = "http://label-server.bstuff:6500"; //  Change this to the actual server IP
+	const BASE_URL = "http://label-server.bstuff:6500/api/v2"; //  Change this to the actual server IP
 
 	// ux8 command: python3 main.py -f UX8.pdf -l dataplate nomac nomac nomac -d string -a 192.168.40.226 -p tcp -b tsc-double -n
 
@@ -149,16 +162,6 @@
 	const isLoading = ref(false);
 	const uploadStatus = ref<string | null>(null);
 	const selectedFile = ref<string | null>(null);
-
-	const uploadStatusClass = computed(() => {
-		if (!uploadStatus.value)
-			return "";
-		if (uploadStatus.value.includes("successfully"))
-			return "text-green-600";
-		if (uploadStatus.value.includes("already exists"))
-			return "text-yellow-600";
-		return "text-red-600";
-	});
 
 	const labelOptions = ref([]);
 
