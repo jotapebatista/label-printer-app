@@ -1,10 +1,11 @@
 <template>
 	<div>
-		<label class="block text-sm font-medium text-gray-200">{{ label }}</label>
+		<label class="block text-sm font-medium text-gray-200 mb-1">{{ label }}</label>
 		<textarea
-			class="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 min-h-38"
+			class="block w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 bg-white text-gray-900 resize-none"
 			:placeholder="placeholder"
 			:value="modelValue"
+			rows="3"
 			@input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
 		/>
 	</div>
